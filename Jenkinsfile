@@ -4,6 +4,8 @@ node ('android-test') {
     step([$class: 'WsCleanup', notFailBuild: true])
     stage('Checkout') {
         // Check out code
+        //properties([disableConcurrentBuilds()])
+        properties([disableConcurrentBuilds(),[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '7', artifactNumToKeepStr: '20', daysToKeepStr: '20', numToKeepStr: '20']]]);
 
 
         checkout scm
@@ -17,12 +19,15 @@ node ('android-test') {
         // Post-checkout prep
         checkout.exportGitEnvVars()
         //checkout.checkoutBackbone()
-
+        sh 'env | sort'
 
         // stash the entire checkout including .git dir
         stash(name: 'sources', useDefaultExcludes: false)
-        stash(name: 'pipeline', includes: 'scripts/jenkins/**')
+        stash(name: 'pipeline', includes: 'scripts/jenkins/**,scripts/git-status/*.jar')
         gitStatus.reportGitStatus('Jenkins Job', 'Running job...', 'pending')
+
+
+
         step([$class: 'WsCleanup', notFailBuild: true])
     }
 }

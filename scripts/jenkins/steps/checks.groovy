@@ -51,7 +51,7 @@ def checkstyle() {
             gitStatus.gitStatusEnabled(('Checkstyle'), {
                 sh "./gradlew checkstyle ${common.gradleParameters()}"
             }, {
-                step([$class: 'CheckStylePublisher', canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', failedTotalAll: '0', healthy: '', pattern: '**/checkstyle.xml', unHealthy: ''])
+                step([$class: 'CheckStylePublisher', canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', failedTotalAll: '9999', healthy: '', pattern: '**/checkstyle.xml', unHealthy: '9999'])
             })
 
             step([$class: 'WsCleanup', notFailBuild: true])
@@ -69,7 +69,7 @@ def lint() {
             gitStatus.gitStatusEnabled(('Lint'), {
                 sh "./gradlew lintSuite ${common.gradleParameters()}"
             }, {
-                step([$class: 'LintPublisher', canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', healthy: '0', pattern: '', unHealthy: '30', useStableBuildAsReference: true])
+                step([$class: 'LintPublisher', canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', healthy: '9999', pattern: '', unHealthy: '9999', useStableBuildAsReference: true])
             })
 
             step([$class: 'WsCleanup', notFailBuild: true])

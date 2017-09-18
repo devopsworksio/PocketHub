@@ -53,6 +53,7 @@ def slackFeed() {
 }
 
 def reportFinalBuildStatus() {
+    unstash 'pipeline'
     def gitStatus = load 'scripts/jenkins/lib/git-status.groovy'
     def body = """
         Build Succeeded!...
@@ -67,14 +68,13 @@ def reportFinalBuildStatus() {
         common.notifyJira(body, "${env.JIRA_ISSUE}")
     } else {
         gitStatus.reportGitStatus('Jenkins Job', 'Job failed!', 'failure')
-
         common.notifyJira("Build Failed!" , "${env.JIRA_ISSUE}")
     }
 }
 
 
 def notifyJira(String message, String key) {
-    if ( key != 'None') {
+    if ( key != 'None' || key !=null) {
         try {
             jiraComment body: message, issueKey: key
         } catch (error) {
@@ -84,7 +84,7 @@ def notifyJira(String message, String key) {
 }
 
 def gradleParameters() {
-    "-PcustomVersionCode=${env.BUILD_NUMBER} -PjenkinsFastDexguardBuildsEnabled=${config.fastDexguardBuilds} -Dorg.gradle.java.home=${env.JAVA_HOME} -Pandroid.enableBuildCache=true -PtestCoverageFlag=true --profile"
+    "-PcustomVersionCode=${env.BUILD_NUMBER} -PjenkinsFastDexguardBuildsEnabled=${config.fastDexguardBuilds} -Dorg.gradle.java.home=${env.JAVA_HOME} -Pandroid.enableBuildCache=true --project-cache-dir=${env.WORKSPACE}/.gradle/cache -PtestCoverageFlag=true --profile"
 }
 
 def archiveCommonArtifacts() {
