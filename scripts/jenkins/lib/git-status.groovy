@@ -2,7 +2,9 @@ def gitStatusEnabled(String context, Closure buildStep, Closure postBuildStep) {
     reportGitStatus(context, "Running $context...", "PENDING")
     try {
         buildStep.call()
+
         reportGitStatus(context, "$context passed!", "SUCCESS")
+
         currentBuild.result = 'SUCCESS'
     } catch (error) {
         reportGitStatus(context, "$context failed!", "FAILURE")
