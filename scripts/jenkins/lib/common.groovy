@@ -63,7 +63,7 @@ def reportFinalBuildStatus() {
         Git Branch: ${env.GIT_BRANCH}
         """
     echo "Job result : ${currentBuild.result}"
-    if (currentBuild.result == null || currentBuild.result == 'success') {
+    if (currentBuild.result == null || currentBuild.result == 'SUCCESS') {
         gitStatus.reportGitStatus('Jenkins Job', 'Job successful!', 'SUCCESS,')
         common.notifyJira(body, "${env.JIRA_ISSUE}")
     } else {
