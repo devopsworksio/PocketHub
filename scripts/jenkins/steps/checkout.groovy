@@ -1,5 +1,7 @@
 import java.util.regex.*
 
+// comment
+
 def exportGitEnvVars() {
     def issue
     sh 'git rev-parse HEAD > commit'
