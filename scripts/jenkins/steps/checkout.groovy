@@ -7,7 +7,7 @@ def exportGitEnvVars() {
     env.GIT_COMMIT = gitCommit.trim()
 
     // TODO: probably a better way to do this
-    if ("${env.CHANGE_BRANCH) != '') {
+    if ("${env.CHANGE_BRANCH}" != '') {
 
         script = '''
     echo ${CHANGE_BRANCH} | egrep -o '([a-zA-Z][a-zA-Z0-9_]+-[0-9]*)([^.]|\\.[^0-9]|\\.\\$|\\$)\'
@@ -17,7 +17,7 @@ def exportGitEnvVars() {
     echo ${BRANCH_NAME} | egrep -o '([a-zA-Z][a-zA-Z0-9_]+-[0-9]*)([^.]|\\.[^0-9]|\\.\\$|\\$)\'
     '''
     }
-        
+
     try {
         issue = sh(script: script, returnStdout: true).trim()
     } catch (error) {
