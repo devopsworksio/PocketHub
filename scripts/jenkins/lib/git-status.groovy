@@ -2,7 +2,7 @@ def gitStatusEnabled(String context, Closure buildStep, Closure postBuildStep) {
     reportGitStatus(context, "Running $context...", "PENDING")
     try {
         buildStep.call()
-        println (">>> Build Step $context passed! <<<")
+
         reportGitStatus(context, "$context passed!", "SUCCESS")
 
         currentBuild.result = 'SUCCESS'
@@ -11,7 +11,7 @@ def gitStatusEnabled(String context, Closure buildStep, Closure postBuildStep) {
         common.notifyJira("Build Failed! ${error.message} ..." , "${env.JIRA_ISSUE}")
         currentBuild.result = 'FAILURE'
         // this will stop the build and mark it as failed
-        error (">>> Build failed in ${error.message}...! <<<")
+
     } finally {
         postBuildStep.call()
     }
@@ -19,6 +19,7 @@ def gitStatusEnabled(String context, Closure buildStep, Closure postBuildStep) {
 
 void reportGitStatus(String context, String description, String status) {
 
+    println (">>> Build Step ${context} ${status}<<<")
     try {
         githubNotify account: 'devopsworksio', context: "$context", credentialsId: 'devopsworksio', description: "${description}", gitApiUrl: '', repo: 'PocketHub', sha: "${env.GIT_COMMIT}", status: "${status}", targetUrl: ''
     } catch (error) {
