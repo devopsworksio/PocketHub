@@ -1,12 +1,23 @@
+import java.util.regex.*
+
 def exportGitEnvVars() {
     def issue
     sh 'git rev-parse HEAD > commit'
     String gitCommit = readFile 'commit'
     env.GIT_COMMIT = gitCommit.trim()
-    // BRANCH_NAME env var available in multi-branch pipeline
-    script = '''
+
+    // TODO: probably a better way to do this
+    if ("${env.CHANGE_BRANCH) != '') {
+
+        script = '''
+    echo ${CHANGE_BRANCH} | egrep -o '([a-zA-Z][a-zA-Z0-9_]+-[0-9]*)([^.]|\\.[^0-9]|\\.\\$|\\$)\'
+    '''
+    } else {
+        script = '''
     echo ${BRANCH_NAME} | egrep -o '([a-zA-Z][a-zA-Z0-9_]+-[0-9]*)([^.]|\\.[^0-9]|\\.\\$|\\$)\'
     '''
+    }
+        
     try {
         issue = sh(script: script, returnStdout: true).trim()
     } catch (error) {
