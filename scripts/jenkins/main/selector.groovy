@@ -15,7 +15,7 @@ node('android-test') {
         checkout.exportGitEnvVars()
         checkout.checkoutBackbone()
         common.stashWorkspace()
-        gitStatus.reportGitStatus('Jenkins Job', 'Running job...', 'pending')
+        gitStatus.reportGitStatus('Jenkins Job', 'Running job...', 'PENDING')
     }
 }
 configuration.execute()
