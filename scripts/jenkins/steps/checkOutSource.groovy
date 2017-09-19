@@ -2,10 +2,6 @@ import java.util.regex.*
 
 // comment
 
-def checkoutSources() {
-
-}
-
 def exportGitEnvVars() {
     def issue
     sh 'git rev-parse HEAD > commit'
