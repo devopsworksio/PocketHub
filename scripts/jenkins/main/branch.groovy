@@ -23,7 +23,6 @@ def execute() {
         gitStatus = load 'scripts/jenkins/lib/git-status.groovy'
         checks = load 'scripts/jenkins/steps/checks.groovy'
         common = load 'scripts/jenkins/lib/common.groovy'
-        keys = load 'scripts/jenkins/lib/keys.groovy'
         bupa = load 'scripts/jenkins/steps/bupa.groovy'
         hockey = load 'scripts/jenkins/steps/hockey.groovy'
 
