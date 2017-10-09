@@ -9,10 +9,15 @@ def execute() {
     def keys
     def bupa
     def gitBranch
+    def releaseKeys = [
+            [$class: 'StringBinding', credentialsId: 'ANDROID_PLAYSTORE_UK_STORE_PASS', variable: 'RELEASE_STORE_PASS'],
+            [$class: 'StringBinding', credentialsId: 'ANDROID_PLAYSTORE_UK_KEY_PASS', variable: 'RELEASE_KEY_PASS'],
+            [$class: 'StringBinding', credentialsId: 'ANDROID_PLAYSTORE_UK_KEY_ALIAS', variable: 'RELEASE_KEY_ALIAS'],
+            [$class: 'FileBinding', credentialsId: 'ANDROID_PLAY_STORE_UK_KEYSTORE', variable: 'RELEASE_KEYSTORE_LOCATION']
+    ]
 
-    node('android-test') {
 
-        // TODO: fix this - expensive
+    node('android') {
         unstash 'sources'
         gitBranch = sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim()
         gitStatus = load 'scripts/jenkins/lib/git-status.groovy'
@@ -20,6 +25,7 @@ def execute() {
         common = load 'scripts/jenkins/lib/common.groovy'
         keys = load 'scripts/jenkins/lib/keys.groovy'
         bupa = load 'scripts/jenkins/steps/bupa.groovy'
+        hockey = load 'scripts/jenkins/steps/hockey.groovy'
 
         step([$class: 'WsCleanup', notFailBuild: true])
     }
@@ -39,59 +45,31 @@ def execute() {
     )
 
     milestone(label: 'Finished testing!')
-
     checks.publishReports()
-
-
     echo "Job result : ${currentBuild.result}"
 
     stage('Package') {
-        lock(inversePrecedence: true, quantity: 1, resource: "android-pipeline-${gitBranch}") {
-            parallel(
-
-                    // TODO: this needs refactoring!
-                    'Build-uk-qa': {
-                        node('android-test') {
-                            step([$class: 'WsCleanup', notFailBuild: true])
-                            unstash 'workspace'
-                            gitStatus.gitStatusEnabled(('Build-uk-qa'), {
-                                sh "./gradlew assembleRelease ${common.gradleParameters()}"
-                                common.archiveCommonArtifacts()
-                                //common.hockeyUpload('**/*uk-qa.apk', '64a4e9ebce0143e4b69bba8dfb5aa45b')
-                            }, {
-                                step([$class: 'WsCleanup', notFailBuild: true])
-                            })
-
-                        }
-                    },
-                    'Build-uk-release': {
-                        node('android-test') {
-                            step([$class: 'WsCleanup', notFailBuild: true])
-
-                            unstash 'workspace'
-                            gitStatus.gitStatusEnabled(('Build-uk-release'), {
-                                sh "./gradlew assembleDebug ${common.gradleParameters()}"
-                                common.archiveCommonArtifacts()
-                                //common.hockeyUpload('**/*uk-release.apk', 'ce8afc86748c44439436747e9bc36092')
-                            }, {
-                                step([$class: 'WsCleanup', notFailBuild: true])
-                            })
-                        }
-                    },
-
-            )
+        switch (env.BRANCH_NAME) {
+            case ~/^release\/.*/: hockey.release(releaseKeys); break;
+            case ~/^(v2|develop)/: hockey.develop(releaseKeys); break;
+            case ~/^PR.*/: hockey.pullRequest(releaseKeys); break;
+            default: error("Branch name is not right for pushing APKs to hockey!");
         }
+        echo "Job result : ${currentBuild.result}"
+        milestone(label: 'Finished packaging!')
     }
 
     echo "Job result : ${currentBuild.result}"
-
     milestone(label: 'Finished packaging!')
 
-    node('android-test') {
-        unstash 'pipeline'
-        echo "Job result : ${currentBuild.result}"
-        common.reportFinalBuildStatus()
-        //common.slackFeed()
+
+    stage('Finish') {
+        node('android') {
+            unstash 'pipeline'
+            echo "Job result : ${currentBuild.result}"
+            common.reportFinalBuildStatus()
+            common.slackFeed()
+        }
     }
 }
 

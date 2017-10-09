@@ -7,7 +7,6 @@ node ('android-test') {
         //properties([disableConcurrentBuilds()])
         properties([disableConcurrentBuilds(),[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '7', artifactNumToKeepStr: '20', daysToKeepStr: '20', numToKeepStr: '20']]]);
 
-
         checkout scm
 
         configuration = load 'scripts/jenkins/main/branch.groovy'
@@ -16,15 +15,19 @@ node ('android-test') {
         gitStatus = load 'scripts/jenkins/lib/git-status.groovy'
         bupa = load 'scripts/jenkins/steps/bupa.groovy'
 
+        def counter = common.buildCounter()
+        println counter.number
+
+
         // Post-checkout prep
         checkout.exportGitEnvVars()
-        //checkout.checkoutBackbone()
+
         sh 'env | sort'
 
         // stash the entire checkout including .git dir
         stash(name: 'sources', useDefaultExcludes: false)
-        stash(name: 'pipeline', includes: 'scripts/jenkins/**,scripts/git-status/*.jar')
-        gitStatus.reportGitStatus('Jenkins Job', 'Running job...', 'pending')
+        stash(name: 'pipeline', includes: 'scripts/jenkins/**')
+        gitStatus.reportGitStatus('Jenkins Job', 'Running job...', 'PENDING')
 
 
 
