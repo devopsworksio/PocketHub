@@ -1,6 +1,4 @@
-@Library('jenkins-pipeline@master') _
+@Library('android-pipeline@master')_
 
-jenkinsPipeline {
-   nodeLabel = 'android'
-
-}
+//String nodeLabel, String androidHome, String gitRef=null, String buildType=null
+jenkinsPipeline ('android','/opt/android-sdk-Linux')
